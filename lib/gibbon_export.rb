@@ -3,7 +3,7 @@ require 'httparty'
 require 'json'
 require 'cgi'
 
-module Gibbon
+module GibbonExport
   class API
     include HTTParty
     format :plain
@@ -11,9 +11,12 @@ module Gibbon
 
     attr_accessor :apikey, :timeout
 
-    def initialize(apikey = nil, extra_params = {})
+    def initialize(apikey = nil, list_id = nil)
       @apikey = apikey
-      @default_params = {:apikey => apikey}.merge(extra_params)
+      @default_params = {:apikey => apikey}.merge(:id => list_id)
+      if list_id == nil
+        raise "YOU need to set a list id"
+      end
     end
 
     def apikey=(value)
@@ -23,13 +26,13 @@ module Gibbon
 
     def base_api_url
       dc = @apikey.blank? ? '' : "#{@apikey.split("-").last}."
-      "https://#{dc}api.mailchimp.com/1.3/?method="
+      "https://#{dc}api.mailchimp.com/export/1.0/list"
     end
 
   def call(method, params = {})
-    url = base_api_url + method
+    url = base_api_url
     params = @default_params.merge(params)
-    response = Gibbon::API.post(url, :body => CGI::escape(params.to_json), :timeout => @timeout)
+    response = GibbonExport::API.post(url, :body => CGI::escape(params.to_json))
 
     begin
       response = ActiveSupport::JSON.decode(response.body)
