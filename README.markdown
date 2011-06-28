@@ -8,7 +8,7 @@ This gem should properly be some kind of fix or new method to the original gem, 
 
 ##Installation
 
-    `gem "gibbon_export", :git => "git://github.com/pgericson/gibbon_export.git"`
+    gem "gibbon_export", :git => "git://github.com/pgericson/gibbon_export.git"
 
 ##Requirements
 
