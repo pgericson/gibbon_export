@@ -36,7 +36,7 @@ Gem::Specification.new do |s|
   s.summary = %q{Gibbon Export is a simple API wrapper for interacting with MailChimp Export API version 1.0.}
   s.test_files = [
     "test/helper.rb",
-    "test/test_gibbon.rb"
+    "test/test_gibbon_export.rb"
   ]
 
   if s.respond_to? :specification_version then
