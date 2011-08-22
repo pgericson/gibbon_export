@@ -23,13 +23,18 @@ module GibbonExport
 
     def base_api_url
       dc = @apikey.blank? ? '' : "#{@apikey.split("-").last}."
-      "https://#{dc}api.mailchimp.com/export/1.0/list"
+      "https://#{dc}api.mailchimp.com/export/1.0/list/"
     end
 
   def call(method, params = {})
     url = base_api_url
-    params = @default_params.merge(params)
-    response = GibbonExport::API.post(url, :body => CGI::escape(params.to_json))
+    tmp_params = @default_params.merge(params)
+    params = {}
+    tmp_params.each do |k,v| 
+      params[CGI::escape(k.to_s)] = CGI::escape(v.to_s)
+    end
+
+    response = GibbonExport::API.get(url, :query => params)
 
     begin
       response = ActiveSupport::JSON.decode(response.body)
