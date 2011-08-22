@@ -11,12 +11,9 @@ module GibbonExport
 
     attr_accessor :apikey, :timeout
 
-    def initialize(apikey = nil, list_id = nil)
+    def initialize(apikey = nil, extra_params = {})
       @apikey = apikey
-      @default_params = {:apikey => apikey}.merge(:id => list_id)
-      if list_id == nil
-        raise "YOU need to set a list id"
-      end
+      @default_params = {:apikey => apikey}.merge(extra_params)
     end
 
     def apikey=(value)
