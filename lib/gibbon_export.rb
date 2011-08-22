@@ -34,14 +34,37 @@ module GibbonExport
       params[CGI::escape(k.to_s)] = CGI::escape(v.to_s)
     end
 
-    response = GibbonExport::API.get(url, :query => params)
-
+    response = GibbonExport::API.post(url, :query => params)
     begin
-      response = ActiveSupport::JSON.decode(response.body)
+      response = parse_bulk(response.body)
     rescue
       response = response.body
     end
     response
+  end
+
+  def parse_bulk(body)
+    if body[0] == "{"
+      result_array = ActiveSupport::JSON.decode(body)
+    else
+      header_done = false
+      result_array = []
+      column_names = []
+      body.each_line do |l|
+        data = l.gsub(/(^\[|\]\n$)/,'').gsub(/\"/,'').split(",")
+        if header_done == false
+          column_names = data.map{|d| d.gsub(/ /, '_').downcase }
+          header_done = true
+        else
+          line_hash = {}
+          column_names.each_with_index do |name,i|
+            line_hash[name.downcase] = data[i] if data[i] != "null"
+          end
+          result_array << line_hash
+        end
+      end
+      result_array
+    end
   end
 
   def method_missing(method, *args)
