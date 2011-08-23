@@ -23,11 +23,11 @@ module GibbonExport
 
     def base_api_url
       dc = @apikey.blank? ? '' : "#{@apikey.split("-").last}."
-      "https://#{dc}api.mailchimp.com/export/1.0/list/"
+      "https://#{dc}api.mailchimp.com/export/1.0/"
     end
 
   def call(method, params = {})
-    url = base_api_url
+    url = base_api_url + method
     tmp_params = @default_params.merge(params)
     params = {}
     tmp_params.each do |k,v| 
@@ -37,18 +37,20 @@ module GibbonExport
     response = GibbonExport::API.post(url, :query => params)
     begin
       response = parse_bulk(response.body)
-    rescue
-      response = response.body
+    #rescue
+    #  response = response.body
     end
     response
   end
 
   def parse_bulk(body)
-    if body[0] == "{"
-      result_array = ActiveSupport::JSON.decode(body)
+    result_array = []
+    if body[0..0] == "{"
+      body.each_line do |l|
+        result_array << ActiveSupport::JSON.decode(l)
+      end
     else
       header_done = false
-      result_array = []
       column_names = []
       body.each_line do |l|
         data = l.gsub(/(^\[|\]\n$)/,'').gsub(/\"/,'').split(",")
@@ -63,8 +65,8 @@ module GibbonExport
           result_array << line_hash
         end
       end
-      result_array
     end
+    result_array
   end
 
   def method_missing(method, *args)
